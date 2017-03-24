@@ -1,14 +1,14 @@
 /* ROOT Component of your App  */
 
 import React, { Component } from 'react'
-import logo from './logo.svg'
+//import logo from './logo.svg'
 import './App.css'
 
 import defaultPicture from './components/img/default.jpg'
 
 const Materialize = window.Materialize
 
-const APP_TITLE = 'Awesome App'
+const APP_TITLE = 'Exchange'
 //update document title (displayed in the opened browser tab)
 document.title = APP_TITLE
 
@@ -26,7 +26,8 @@ class App extends Component {
         super( props )
         this.state = {
             weather: undefined,
-            city: ''
+            city: '',
+            taux: undefined
         }
     }
 
@@ -36,7 +37,7 @@ class App extends Component {
             <div className="App">
                 <div className="App-header">
                     <h1>{ APP_TITLE }</h1>
-                    <img src={ logo } className="App-logo" alt="logo" />
+                    <img src='http://www.fly2pie.com/images/default-source/icons/currency-exchange-logo.tmb-custom.png?sfvrsn=0' className="App-logo" alt="logo" />
                 </div>
 
                 <div className="App-content">
@@ -65,8 +66,8 @@ class App extends Component {
                         </div>
                     </div>
                 </div>
-
             </div>
+
         )
     }
 
@@ -87,37 +88,25 @@ class App extends Component {
 
         /* ASYNC - AWAIT DOCUMENTATION : https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Op%C3%A9rateurs/await */
 
-        try {
-            let weather = await get( ENDPOINTS.WEATHER_API_URL, {
-                //YOU NEED TO PROVIDE YOUR "APIXU" API KEY HERE, see /utils/api.js file to grab the DOCUMENTATION file
-                key: '07fb607594c34e5b9ca213416172302',
-                q: this.state.city
-            } )
+      
 
-            //checking that we received a well-formated weather object
-            if ( weather.current ) {
-                //weather data is now received from the server thanks to async-await
-                let updatedWeatherWithImage = await this.fetchPicture( weather )
+        var request = require('request-promise')
 
-                /* React state DOCUMENTATION : https://facebook.github.io/react/docs/lifting-state-up.html */
-                this.setState( {
-                    weather: updatedWeatherWithImage
-                } )
-            }
-            //handling error
-            else {
-                console.log( weather )
-                //weather will contain an error object (see APIXU DOCUMENTATION)
-                Materialize.toast( weather.error.message, 8000, 'error-toast' )
-                //Using Materialize toast component to display error messages - see http://materializecss.com/dialogs.html
-            }
+        var options = {
+              headers:{'X-Auth-Token': '8fbb0daf0f7e49c2a125611145cfc997'},
+              url:'http://api.fixer.io/latest',
 
+              dataType:'json',
+              type: 'GET'//PUT, POST, DELETE
+        };
 
-        }
-        catch ( error ) {
-            Materialize.toast( error, 8000, 'error-toast' )
-            console.log( 'Failed fetching data: ', error )
-        }
+        let taux = request.get(options).then(function(body)
+        {
+          var json = JSON.parse(body);
+          console.log(json);
+
+          return json;
+        });
 
     }
 
@@ -153,6 +142,11 @@ class App extends Component {
             Materialize.toast( error, 8000, 'error-toast' )
             console.log( 'Failed fetching picture: ', error )
         }
+////////////////////////////////////////////////////////////////////////////
+
+
+
+///////////////////////////////////////////////////////////////////////////
 
         return weather
     }
@@ -164,7 +158,7 @@ class App extends Component {
 
         /*
             DATA FORMAT SENT BY THE API LOKKS LIKE THIS :
-    
+
             {
                 "pixabayPicture": string, //CUSTOM ADD VIA PIXABAY API CALL
                 "location": {
@@ -187,7 +181,7 @@ class App extends Component {
                     "wind_kph": number
                 }
             }
-    
+
         */
 
         if ( weather ) {
